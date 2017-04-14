@@ -1,2 +1,4 @@
 # Mogeste-for-iOS
-iOS version of Mogeste Project
+This is the iOS version of Mogeste Project. 
+
+It’s not for any use other than my personal study and research. 
