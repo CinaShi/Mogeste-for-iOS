@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+    <device id="watch38" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11508"/>
+    </dependencies>
+    <scenes>
+        <!--Interface Controller-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="Mogeste_WatchKit_App" customModuleProvider="target">
+                    <items>
+                        <button height="25" alignment="center" title="Accelerometer" id="5cG-Uv-bUy">
+                            <color key="titleColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        </button>
+                        <label width="135" alignment="left" text="Label" id="eJT-9g-kap"/>
+                        <button height="25" alignment="center" title="Gyroscope" id="EFn-3S-ChR">
+                            <color key="titleColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        </button>
+                        <label width="135" alignment="left" text="Label" id="EhK-nU-ek4"/>
+                        <button height="25" alignment="center" title="START" id="6YH-fx-ysg">
+                            <color key="titleColor" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="startRecord" destination="AgC-eL-Hgc" id="Qfc-Uh-m37"/>
+                            </connections>
+                        </button>
+                        <button height="25" alignment="center" title="STOP" id="Bvh-Hp-gZM">
+                            <color key="titleColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="stopRecord" destination="AgC-eL-Hgc" id="S0a-Pe-yhZ"/>
+                            </connections>
+                        </button>
+                    </items>
+                    <connections>
+                        <outlet property="accelerometerLabel" destination="eJT-9g-kap" id="tQV-gB-y3X"/>
+                        <outlet property="gyroscopeLabel" destination="EhK-nU-ek4" id="huC-rU-fuC"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="220" y="345"/>
+        </scene>
+    </scenes>
+</document>
