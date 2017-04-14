@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		080834C81EA15E8500FDF696 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 080834C61EA15E8500FDF696 /* Main.storyboard */; };
 		086B36091E67751F00D8DDDB /* FFNN.swift in Sources */ = {isa = PBXBuildFile; fileRef = 086B36081E67751F00D8DDDB /* FFNN.swift */; };
 		08757B751E54EAE000219BCA /* GestureListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08757B741E54EAE000219BCA /* GestureListViewController.swift */; };
 		08757B771E54FBFC00219BCA /* Gesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08757B761E54FBFC00219BCA /* Gesture.swift */; };
@@ -111,6 +112,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		080834C71EA15E8500FDF696 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		086B36081E67751F00D8DDDB /* FFNN.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FFNN.swift; sourceTree = "<group>"; };
 		08757B741E54EAE000219BCA /* GestureListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GestureListViewController.swift; sourceTree = "<group>"; };
 		08757B761E54FBFC00219BCA /* Gesture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gesture.swift; sourceTree = "<group>"; };
@@ -219,6 +221,7 @@
 		08C649581E3FDD430049CB58 /* Mogeste */ = {
 			isa = PBXGroup;
 			children = (
+				080834C61EA15E8500FDF696 /* Main.storyboard */,
 				08C649591E3FDD430049CB58 /* AppDelegate.swift */,
 				08C6495B1E3FDD430049CB58 /* ViewController.swift */,
 				08757B741E54EAE000219BCA /* GestureListViewController.swift */,
@@ -469,6 +472,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				080834C81EA15E8500FDF696 /* Main.storyboard in Resources */,
 				08C649641E3FDD430049CB58 /* LaunchScreen.storyboard in Resources */,
 				08C649611E3FDD430049CB58 /* Assets.xcassets in Resources */,
 			);
@@ -628,6 +632,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		080834C61EA15E8500FDF696 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				080834C71EA15E8500FDF696 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		08C649621E3FDD430049CB58 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
