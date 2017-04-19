@@ -467,24 +467,17 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Gesture list" id="I87-mx-mlc">
-                        <barButtonItem key="leftBarButtonItem" title="train" id="Qhp-hA-EAP">
-                            <connections>
-                                <action selector="trainSelectedGestures:" destination="dSK-ei-89J" id="JAI-8j-m5H"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="IE8-ws-yFK">
-                            <connections>
-                                <segue destination="IZf-pd-nqv" kind="show" identifier="addNewGesture" id="5Rs-VR-htr"/>
-                            </connections>
-                        </barButtonItem>
+                        <barButtonItem key="leftBarButtonItem" title="train" id="Qhp-hA-EAP"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="IE8-ws-yFK"/>
                     </navigationItem>
                     <connections>
                         <segue destination="FZt-Yw-d1H" kind="show" identifier="gestureSamples" id="72D-Nc-ezn"/>
+                        <segue destination="IZf-pd-nqv" kind="show" identifier="addNewGesture" id="zx9-cg-cv0"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3Zv-cb-TSQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1550.7246376811595" y="-602.44565217391312"/>
+            <point key="canvasLocation" x="1525" y="-602"/>
         </scene>
         <!--Gesture name-->
         <scene sceneID="xMk-gF-tbp">
@@ -664,6 +657,6 @@
         <image name="wifi_not_connected" width="128" height="128"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="5Rs-VR-htr"/>
+        <segue reference="zx9-cg-cv0"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -23,7 +23,17 @@ class GestureListViewController: UITableViewController {
     var trainingInstances = [[Float]]()
     var trainingLabels = [[Float]]()
     
+    var gesturesToTrain = [Gesture]()
+    var gestureNamesToClassify = [String]()
+    
+    var networkWeights = [Float]()
+    
     var startTime: CFAbsoluteTime!
+    
+    var activityIndicator = UIActivityIndicatorView()
+    var strLabel = UILabel()
+    
+    let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +43,19 @@ class GestureListViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        self.navigationItem.leftBarButtonItem?.isEnabled = true
+        self.navigationItem.rightBarButtonItem?.isEnabled = true
+        self.tableView.setEditing(false, animated: true)
+        self.tableView.isUserInteractionEnabled = true
+        
+        let addBtn = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewSample))
+        
+        self.navigationItem.setRightBarButton(addBtn, animated: true)
+        
+        let trainBtn = UIBarButtonItem(title: "train", style: .plain, target: self, action: #selector(trainSelectedGestures))
+        
+        self.navigationItem.setLeftBarButton(trainBtn, animated: true)
         
         loadStoredGestures()
         self.tableView.reloadData()
@@ -51,71 +74,22 @@ class GestureListViewController: UITableViewController {
     }
     
     func addSampleToGestureAndReloadTable() {
-//        var gestureToTrain:Gesture!
         if gestures.contains(where: {$0.gestureName == newlyAddedSample?.gesture}) {
             for (index, ges) in gestures.enumerated() {
                 if ges.gestureName == newlyAddedSample?.gesture {
                     ges.append(sample: newlyAddedSample!)
                     gestures[index] = ges
-//                    gestureToTrain = ges
                 }
             }
         } else {
             let gid = gestures.count + 1
             let newGesture = Gesture(gestureName: (newlyAddedSample?.gesture)!, samples: [newlyAddedSample!], gid: gid)
             gestures.append(newGesture)
-//            gestureToTrain = newGesture
         }
         let encodedData: Data = NSKeyedArchiver.archivedData(withRootObject: gestures)
         userDefaults.set(encodedData, forKey: "gestures")
         userDefaults.synchronize()
         self.tableView.reloadData()
-        
-//        DispatchQueue.global().async {
-//            self.trainGesture(gesture: gestureToTrain, newSample: self.newlyAddedSample!)
-//            DispatchQueue.main.async(execute: {
-//                self.tableView.reloadData()
-//            })
-//        }
-        
-    }
-    
-    func trainGesture(gesture: Gesture, newSample: Sample) {
-        var gestureTrainInstances = [[Float]]()
-        var gestureTrainLabels = [[Float]]()
-        
-        for sample in gesture.samples{
-            gestureTrainInstances.append(calculateTrainingFeatures(sample: sample))
-            gestureTrainLabels.append([1.0])
-        }
-        //use neural nets as classifier
-        do {
-            var network = FFNN.fromFile(filename: "\(gesture.gestureName)_NN")
-            startTime = CFAbsoluteTimeGetCurrent()
-            if network != nil {
-                print("update network started")
-                //update network with new input
-                let _: [Float] = try network!.update(inputs: calculateTrainingFeatures(sample: newlyAddedSample!))
-                
-                let _: Float = try network!.backpropagate(answer: [1.0])
-                print("update network done")
-            } else {
-                //set up new network
-                print("add network started")
-                let featureAmount = gestureTrainInstances.first!.count
-                
-                network = FFNN(inputs: featureAmount, hidden: featureAmount / 2, outputs: 1, learningRate: 0.001, momentum: 0.4, weights: nil, activationFunction : .Sigmoid, errorFunction: .Default(average: false))
-                
-                _ = try network?.train(inputs: gestureTrainInstances, answers: gestureTrainLabels, testInputs: gestureTrainInstances, testAnswers: gestureTrainLabels, errorThreshold: 0.2)
-                print("add network done")
-            }
-            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-            print("trained \(gesture.gestureName!) in \(elapsed) seconds.")
-            network?.writeToFile(filename: "\(gesture.gestureName)_NN")
-        } catch {
-            print("error occured!")
-            print("\(error.localizedDescription)")
-        }
         
     }
     
@@ -134,20 +108,42 @@ class GestureListViewController: UITableViewController {
         }
     }
     
-    @IBAction func trainSelectedGestures(_ sender: Any) {
-        trainingInstances.removeAll()
-        trainingLabels.removeAll()
-        if gestures.count > 0 {
+    func addNewSample() {
+        self.performSegue(withIdentifier: "addNewGesture", sender: self)
+    }
+    
+    func cancelTraining() {
+        
+        self.tableView.setEditing(false, animated: true)
+        
+        let addBtn = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewSample))
+    
+        self.navigationItem.setRightBarButton(addBtn, animated: true)
+        
+        let trainBtn = UIBarButtonItem(title: "train", style: .plain, target: self, action: #selector(trainSelectedGestures))
+        
+        self.navigationItem.setLeftBarButton(trainBtn, animated: true)
+    }
+    
+    func finishAndTrain() {
+        
+        self.navigationItem.leftBarButtonItem?.isEnabled = false
+        self.navigationItem.rightBarButtonItem?.isEnabled = false
+        activityIndicator("training")
+        
+        if gesturesToTrain.count > 0 {
+            self.tableView.isUserInteractionEnabled = false
+            
             var selectedGestures = [Gesture]()
             var gestureNames = [String]()
-            for gesture in gestures {
-                if gesture.gestureName == "train1" || gesture.gestureName == "train2" || gesture.gestureName == "train3" {
-                    selectedGestures.append(gesture)
-                    if !gestureNames.contains(gesture.gestureName) {
-                        gestureNames.append(gesture.gestureName)
-                    }
+            for gesture in gesturesToTrain {
+                selectedGestures.append(gesture)
+                if !gestureNames.contains(gesture.gestureName) {
+                    gestureNames.append(gesture.gestureName)
                 }
             }
+            
+            gestureNamesToClassify = gestureNames
             print("gesture names ---> \(gestureNames)")
             
             if selectedGestures.count > 0 {
@@ -173,24 +169,10 @@ class GestureListViewController: UITableViewController {
                     
                     let featureAmount = trainingInstances.first!.count
                     
-//                    print("training instances ---> \(trainingInstances)")
+                    //                    print("training instances ---> \(trainingInstances)")
                     print("training instances feature # ---> \(featureAmount)")
                     print("training labels ---> \(trainingLabels)")
-                    //set up test data
-//                    var testInstances = [[Float]]()
-//                    var testLabels = [[Float]]()
-//                    
-//                    
-//                    
-//                    testInstances.append(trainingInstances.first!)
-//                    testInstances.append(trainingInstances[6])
-//                    testInstances.append(trainingInstances[12])
-//                    testLabels.append(trainingLabels.first!)
-//                    testLabels.append(trainingLabels[6])
-//                    testLabels.append(trainingLabels[12])
-//                    
-//                    print("testing instances ---> \(testInstances)")
-//                    print("testing labels ---> \(testLabels)")
+                    
                     
                     //set up neural network
                     startTime = CFAbsoluteTimeGetCurrent()
@@ -199,70 +181,107 @@ class GestureListViewController: UITableViewController {
                     let network = FFNN(inputs: featureAmount, hidden: featureAmount * 2 / 3, outputs: gestureNames.count, learningRate: 0.008, momentum: 0.1, weights: nil, activationFunction : .HyperbolicTangent, errorFunction: .Default(average: true))
                     do {
                         _ = try network.train(inputs: trainingInstances, answers: trainingLabels, testInputs: trainingInstances, testAnswers: trainingLabels, errorThreshold: 0.06)
-//                        print("weights -> \(weights)")
-                        for gesture in gestures {
-                            if gesture.gestureName == "test" {
-                                var sampleNumber = 1
-                                for testSample in gesture.samples {
-                                    let output:[Float] = try network.update(inputs: calculateTrainingFeatures(sample: testSample))
-//                                    print(calculateTrainingFeatures(sample: testSample))
-                                    print(output)
-                                    let predictedIndex = maxIndex(array: output)
-                                    if predictedIndex >= 0 {
-                                        print("test sample \(sampleNumber) predicted ---> \(gestureNames[predictedIndex])")
-                                        sampleNumber += 1
-                                    } else {
-                                        print("some errors happen")
-                                        break
-                                    }
-                                }
-                                break
-                            }
-                        }
-
                         
+                        network.writeToFile(filename: "current network")
                         
+                        self.performSegue(withIdentifier: "addNewGesture", sender: "has network")
+                        //                        print("weights -> \(weights)")
+                        
+                        //do testing on new sample
+                        
+//                        for gesture in gestures {
+//                            if gesture.gestureName == "test" {
+//                                var sampleNumber = 1
+//                                for testSample in gesture.samples {
+//                                    let output:[Float] = try network.update(inputs: calculateTrainingFeatures(sample: testSample))
+//                                    //                                    print(calculateTrainingFeatures(sample: testSample))
+//                                    print(output)
+//                                    let predictedIndex = maxIndex(array: output)
+//                                    if predictedIndex >= 0 {
+//                                        print("test sample \(sampleNumber) predicted ---> \(gestureNames[predictedIndex])")
+//                                        sampleNumber += 1
+//                                    } else {
+//                                        print("some errors happen")
+//                                        break
+//                                    }
+//                                }
+//                                break
+//                            }
+//                        }
                     } catch {
                         print(error)
+                        effectView.removeFromSuperview()
+                        self.tableView.isUserInteractionEnabled = true
                     }
-                    
-                    //use SVM as classifier
-//                    let trainingInput = YCDataframe()
-//                    let trainingOutput = YCDataframe()
-//                    
-//                    for (index,instance) in trainingInstances.enumerated() {
-//                        trainingInput.addSamples(withData: instance)
-//                        trainingOutput.addSamples(withData: trainingLabels[index])
-//                    }
-//                    
-//                    let trainer = YCSMORegressionTrainer()
-//                    
-//                    let model = trainer.train(nil, input: trainingInput, output: trainingOutput)
-//                    
-//                    let testInput = YCDataframe()
-//                    
-//                    for gesture in gestures {
-//                        if gesture.gestureName == "test" {
-//                            for testSample in gesture.samples {
-//                                testInput.addSamples(withData: calculateTrainingFeatures(sample: testSample))
-//                            }
-//                            break
-//                        }
-//                    }
-//                    
-//                    let prediction = model?.activate(with: testInput)
-//                    print(prediction ?? "error")
                     
                     let elapsed = CFAbsoluteTimeGetCurrent() - startTime
                     print("trained multiple gestures in \(elapsed) seconds.")
+                    effectView.removeFromSuperview()
+                    
                 }
                 
             } else {
                 print("no training sets available!")
+                sendAlert(title: "Hey!", message: "Currently there is no training sets yet!")
             }
         } else {
-            print("currently no gestures!")
+            print("currently no gesture selected!")
+            sendAlert(title: "Hey!", message: "Currently there is no gesture selected yet!")
         }
+    }
+    
+    func activityIndicator(_ title: String) {
+        
+        strLabel.removeFromSuperview()
+        activityIndicator.removeFromSuperview()
+        effectView.removeFromSuperview()
+        
+        strLabel = UILabel(frame: CGRect(x: 50, y: 0, width: 160, height: 46))
+        strLabel.text = title
+        strLabel.font = UIFont.systemFont(ofSize: 14, weight: UIFontWeightMedium)
+        strLabel.textColor = UIColor(white: 0.9, alpha: 0.7)
+        
+        effectView.frame = CGRect(x: view.frame.midX - strLabel.frame.width/2, y: view.frame.midY - strLabel.frame.height/2 , width: 160, height: 46)
+        effectView.layer.cornerRadius = 15
+        effectView.layer.masksToBounds = true
+        
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .white)
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: 46, height: 46)
+        activityIndicator.startAnimating()
+        
+        effectView.addSubview(activityIndicator)
+        effectView.addSubview(strLabel)
+        self.navigationController?.view.addSubview(effectView)
+    }
+    
+    func sendAlert(title: String, message: String) {
+        self.navigationItem.leftBarButtonItem?.isEnabled = true
+        self.navigationItem.rightBarButtonItem?.isEnabled = true
+        self.effectView.removeFromSuperview()
+        
+        self.tableView.isUserInteractionEnabled = true
+        
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    func trainSelectedGestures() {
+        
+        self.tableView.allowsMultipleSelectionDuringEditing = true
+        self.tableView.setEditing(true, animated: true)
+        
+        let cancelBtn = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTraining))
+        
+        self.navigationItem.setLeftBarButton(cancelBtn, animated: true)
+        
+        gesturesToTrain.removeAll()
+        trainingInstances.removeAll()
+        trainingLabels.removeAll()
+        
+        let finishBtn = UIBarButtonItem(title: "Finish", style: .plain, target: self, action: #selector(finishAndTrain))
+        
+        self.navigationItem.setRightBarButton(finishBtn, animated: true)
     }
     
     func maxIndex(array: [Float]) -> Int {
@@ -560,23 +579,19 @@ class GestureListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: false)
-        selected = gestures[indexPath.row].samples
-        performSegue(withIdentifier: "gestureSamples", sender: nil)
+        if tableView.isEditing {
+            gesturesToTrain.append(gestures[indexPath.row])
+        } else {
+            tableView.deselectRow(at: indexPath, animated: false)
+            selected = gestures[indexPath.row].samples
+            performSegue(withIdentifier: "gestureSamples", sender: nil)
+        }
     }
     
-    // MARK: - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "gestureSamples"{
-            let destination = segue.destination as! GestureSamplesTableViewController
-            destination.samples = selected!
-        } else if segue.identifier == "addNewGesture" {
-            let destination = segue.destination as! MetawearTableViewController
-            destination.VCsourceIdentifier = "gestureList"
+    override func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+        if tableView.isEditing {
+            gesturesToTrain.remove(at: gesturesToTrain.index(of: gestures[indexPath.row])!)
         }
-        
     }
     
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
@@ -593,51 +608,25 @@ class GestureListViewController: UITableViewController {
             tableView.reloadData()
         }
     }
- 
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
+    
     // MARK: - Navigation
-
+    
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "gestureSamples"{
+            let destination = segue.destination as! GestureSamplesTableViewController
+            destination.samples = selected!
+        } else if segue.identifier == "addNewGesture" {
+            let destination = segue.destination as! MetawearTableViewController
+            destination.VCsourceIdentifier = "gestureList"
+            if let hasNetworkMessage = sender as? String {
+                if hasNetworkMessage == "has network" {
+                    destination.gestureToTrain = gesturesToTrain
+                    destination.gestureNamesToClassify = gestureNamesToClassify
+                }
+            }
+        }
+        
     }
-    */
 
 }

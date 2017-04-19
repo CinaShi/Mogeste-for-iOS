@@ -20,6 +20,9 @@ class MetawearTableViewController: UIViewController, UITextFieldDelegate, UITabl
     var dfuController: DFUServiceController?
     var VCsourceIdentifier: String!
     
+    var gestureToTrain: [Gesture]?
+    var gestureNamesToClassify: [String]?
+    
     var gestureNameFromSampleList = ""
     
     @IBOutlet weak var scanningSwitch: UISwitch!
@@ -42,6 +45,12 @@ class MetawearTableViewController: UIViewController, UITextFieldDelegate, UITabl
         if VCsourceIdentifier == "sampleList" {
             gestureNameTextField.text = gestureNameFromSampleList
             gestureNameTextField.isEnabled = false
+            self.title = "New sample"
+        }
+        
+        if gestureToTrain != nil {
+            gestureNameTextField.isHidden = true
+            self.title = "Classify a new sample"
         }
     }
     
@@ -210,6 +219,11 @@ class MetawearTableViewController: UIViewController, UITextFieldDelegate, UITabl
             destination.device = selected!
             destination.gestureName = gestureNameTextField.text == "" ? "Default gesture" : gestureNameTextField.text
             destination.VCsourceIdentifier = self.VCsourceIdentifier
+            
+            if gestureToTrain != nil {
+                destination.gestureToTrain = gestureToTrain
+                destination.gestureNamesToClassify = gestureNamesToClassify
+            }
         }
         
     }
