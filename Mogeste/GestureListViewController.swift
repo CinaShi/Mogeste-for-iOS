@@ -8,8 +8,12 @@
 
 import UIKit
 import SigmaSwiftStatistics
+import RealmSwift
 
 class GestureListViewController: UITableViewController {
+    
+    var notificationToken: NotificationToken!
+    var realm: Realm!
     
     private var nextNextGaussian: Double? = {
         srand48(Int(arc4random())) //initialize drand48 buffer at most once
@@ -37,7 +41,8 @@ class GestureListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+//        setupRealm()
         
     }
 
@@ -59,6 +64,44 @@ class GestureListViewController: UITableViewController {
         
         loadStoredGestures()
         self.tableView.reloadData()
+    }
+    
+//    func setupRealm() {
+//        // Log in existing user with username and password
+//        let username = "ccc1nnn4@gmail.com"  // <--- Update this
+//        let password = "cina1025."  // <--- Update this
+//        
+//        SyncUser.logIn(with: .usernamePassword(username: username, password: password, register: false), server: URL(string: "http://127.0.0.1:9080")!) { user, error in
+//            guard let user = user else {
+//                fatalError(String(describing: error))
+//            }
+//            
+//            DispatchQueue.main.async {
+//                // Open Realm
+//                let configuration = Realm.Configuration(
+//                    syncConfiguration: SyncConfiguration(user: user, realmURL: URL(string: "realm://127.0.0.1:9080/~/realmtasks")!)
+//                )
+//                self.realm = try! Realm(configuration: configuration)
+//                
+//                // Show initial tasks
+//                func updateGestures() {
+//                    if self.items.realm == nil, let list = self.realm.objects(TaskList.self).first {
+//                        self.items = list.items
+//                    }
+//                    self.tableView.reloadData()
+//                }
+//                updateGestures()
+//                
+//                // Notify us when Realm changes
+//                self.notificationToken = self.realm.addNotificationBlock { _ in
+//                    updateGestures()
+//                }
+//            }
+//        }
+//    }
+    
+    deinit {
+        notificationToken.stop()
     }
     
     func loadStoredGestures() {

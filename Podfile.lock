@@ -7,6 +7,11 @@ PODS:
   - MetaWear (2.8.3):
     - Bolts/Tasks (~> 1.8.4)
     - FastCoding+tvOS (~> 3.2.1)
+  - Realm (2.6.1):
+    - Realm/Headers (= 2.6.1)
+  - Realm/Headers (2.6.1)
+  - RealmSwift (2.6.1):
+    - Realm (= 2.6.1)
   - SigmaSwiftStatistics (5.0.1)
   - StaticDataTableViewController (2.0.5)
   - Zip (0.7.0)
@@ -15,6 +20,7 @@ DEPENDENCIES:
   - iOSDFULibrary
   - MBProgressHUD
   - MetaWear
+  - RealmSwift
   - SigmaSwiftStatistics (~> 5.0)
   - StaticDataTableViewController
 
@@ -24,10 +30,12 @@ SPEC CHECKSUMS:
   iOSDFULibrary: 3b8a3014e3e4d1bec99b634b2f79fa856e28e556
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
   MetaWear: edb17be3e38fd7d262ea433f257a0655c0401f07
+  Realm: 9abfd4f87519376daa5ae3a4603155de408bf8b3
+  RealmSwift: a54d3e8931cf7d3afa5a1fac9c8f88109d7f02b3
   SigmaSwiftStatistics: 58a89e471f7f07465b0cdac7eded7b25e5243762
   StaticDataTableViewController: 7ea8d7bc8c7f0a4e9255a320224462c7346c1d4a
   Zip: e34513299ac38c0686d5b24504da7ce343799ab9
 
-PODFILE CHECKSUM: 629facb619ba5358d829dec1f99cc044fcb1bc4a
+PODFILE CHECKSUM: a1aa4b05be689a492ef1753cfd90b1ada70f9eb8
 
 COCOAPODS: 1.2.0
